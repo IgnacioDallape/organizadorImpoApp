@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impo Tracker — FC-01 Container House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #F7F5F2;
+    --surface:   #FFFFFF;
+    --border:    #E4E0DA;
+    --border-md: #CEC9C1;
+    --text-1:    #1C1A17;
+    --text-2:    #6B6560;
+    --text-3:    #9E9891;
+    --accent:    #2D5016;
+    --accent-bg: #EBF2E4;
+    --accent-bd: #B5D19A;
+    --amber:     #8A5C00;
+    --amber-bg:  #FEF3DC;
+    --amber-bd:  #E8C96A;
+    --blue:      #1A4A7A;
+    --blue-bg:   #EBF1FA;
+    --blue-bd:   #9DBDE0;
+    --coral:     #8C3520;
+    --coral-bg:  #FAEDE9;
+    --coral-bd:  #E0A898;
+    --done-line: rgba(45,80,22,0.35);
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  html { font-size: 15px; }
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 860px; margin: 0 auto;
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1rem 0;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--text-1);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--accent); font-style: italic; }
+  .header-progress {
+    flex: 1;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .prog-track {
+    flex: 1; height: 4px;
+    background: var(--border);
+    border-radius: 99px; overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .prog-text { font-size: 0.8rem; color: var(--text-2); white-space: nowrap; font-weight: 500; }
+  .btn-reset {
+    font-size: 0.75rem; color: var(--text-3); background: none; border: none;
+    cursor: pointer; padding: 4px 8px; border-radius: var(--r-sm);
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-reset:hover { background: var(--border); color: var(--text-2); }
+
+  /* LAYOUT */
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+
+  /* SUMMARY CARDS */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 0.72rem; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: var(--text-1); line-height: 1; }
+  .stat-sub { font-size: 0.75rem; color: var(--text-2); margin-top: 3px; }
+
+  /* PHASES */
+  .phase { margin-bottom: 12px; }
+
+  .phase-header {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow);
+    user-select: none;
+  }
+  .phase-header:hover { border-color: var(--border-md); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .phase-header.open { border-radius: var(--r-lg) var(--r-lg) 0 0; border-bottom-color: transparent; }
+
+  .phase-badge {
+    width: 30px; height: 30px; min-width: 30px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 500;
+    border: 1.5px solid;
+    transition: all 0.2s;
+  }
+  .phase-info { flex: 1; min-width: 0; }
+  .phase-title { font-size: 0.9rem; font-weight: 500; color: var(--text-1); }
+  .phase-time { font-size: 0.72rem; color: var(--text-3); margin-top: 1px; }
+  .phase-right { display: flex; align-items: center; gap: 10px; }
+  .phase-count { font-size: 0.75rem; color: var(--text-2); font-weight: 500; }
+  .chevron {
+    width: 18px; height: 18px; color: var(--text-3);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .phase-header.open .chevron { transform: rotate(180deg); }
+
+  /* STEPS BODY */
+  .phase-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  .phase-body.open { max-height: 2000px; }
+
+  .steps-list { padding: 6px 10px 10px; }
+
+  .step {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 0.12s;
+    border: 1px solid transparent;
+  }
+  .step:hover { background: var(--bg); border-color: var(--border); }
+
+  .step-chk {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-md);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s;
+    background: var(--surface);
+  }
+  .step.done .step-chk {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .step-chk svg { display: none; }
+  .step.done .step-chk svg { display: block; }
+
+  .step-body { flex: 1; min-width: 0; }
+  .step-title {
+    font-size: 0.85rem; font-weight: 500; color: var(--text-1);
+    line-height: 1.4; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .step.done .step-title { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--done-line); }
+  .step-sub { font-size: 0.78rem; color: var(--text-2); margin-top: 3px; line-height: 1.55; }
+  .step.done .step-sub { color: var(--text-3); }
+
+  /* TAGS */
+  .tag {
+    display: inline-flex; align-items: center;
+    font-size: 0.67rem; font-weight: 500; letter-spacing: 0.03em;
+    padding: 2px 7px; border-radius: 99px;
+    border: 1px solid; line-height: 1.5;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .tag-key   { background: var(--accent-bg); color: var(--accent);   border-color: var(--accent-bd); }
+  .tag-warn  { background: var(--amber-bg);  color: var(--amber);    border-color: var(--amber-bd); }
+  .tag-info  { background: var(--blue-bg);   color: var(--blue);     border-color: var(--blue-bd); }
+  .tag-alert { background: var(--coral-bg);  color: var(--coral);    border-color: var(--coral-bd); }
+
+  /* PHASE COLORS by id */
+  .ph-A .phase-badge { background: #EEEDFE; color: #3C3489; border-color: #AFA9EC; }
+  .ph-B .phase-badge { background: #EBF1FA; color: #185FA5; border-color: #9DBDE0; }
+  .ph-C .phase-badge { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-bd); }
+  .ph-D .phase-badge { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
+  .ph-E .phase-badge { background: var(--coral-bg); color: var(--coral); border-color: var(--coral-bd); }
+  .ph-F .phase-badge { background: #EAF3DE; color: #3B6D11; border-color: #97C459; }
+
+  .ph-A.done .phase-badge, .ph-B.done .phase-badge, .ph-C.done .phase-badge,
+  .ph-D.done .phase-badge, .ph-E.done .phase-badge, .ph-F.done .phase-badge {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+
+  /* DIVIDER */
+  .step-divider {
+    height: 1px; background: var(--border);
+    margin: 2px 10px;
+  }
+
+  /* NOTA */
+  .nota {
+    margin-top: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-md);
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.78rem;
+    color: var(--text-2);
+    line-height: 1.7;
+    box-shadow: var(--shadow);
+  }
+  .nota strong { color: var(--text-1); font-weight: 500; }
+
+  /* CELEBRATION */
+  .celebration {
+    display: none;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-bd);
+    border-radius: var(--r-lg);
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .celebration.show { display: block; }
+  .celebration-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem; color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .celebration-sub { font-size: 0.85rem; color: var(--text-2); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    header { padding: 0 1rem; }
+    main { padding: 1.25rem 1rem 4rem; }
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .phase-time { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">impo<span>tracker</span></div>
+    <div class="header-progress">
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <span class="prog-text" id="prog-text">0 / 28</span>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">Reiniciar</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="celebration" id="celebration">
+    <div class="celebration-title">¡Importación completada!</div>
+    <div class="celebration-sub">Todos los pasos fueron finalizados. Los módulos FC-01 están en Argentina.</div>
+  </div>
+
+  <div class="summary">
+    <div class="stat">
+      <div class="stat-label">Completado</div>
+      <div class="stat-value" id="s-done">0</div>
+      <div class="stat-sub" id="s-total">de 28 pasos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Etapas</div>
+      <div class="stat-value" id="s-phases">0</div>
+      <div class="stat-sub">de 6 fases</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Progreso</div>
+      <div class="stat-value" id="s-pct">0%</div>
+      <div class="stat-sub" id="s-status">En curso</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">NCM probable</div>
+      <div class="stat-value" style="font-size:1.1rem;padding-top:4px">9406.90.20</div>
+      <div class="stat-sub">Arancel 12,6% — Dec. 513/2025</div>
+    </div>
+  </div>
+
+  <div id="phases-container"></div>
+
+  <div class="nota">
+    <strong>Aviso legal:</strong> este organizador es una guía operativa basada en normativa vigente al momento de su elaboración. No reemplaza la clasificación formal del despachante/aduana ni el asesoramiento jurídico. Siempre confirmar NCM, tributos e intervenciones con el despachante antes de oficializar. El SEDI fue derogado en 2025 pero pueden existir otros controles vigentes al momento del embarque.
+  </div>
+
+</main>
+
+<script>
+const STORAGE_KEY = 'impotracker_v1';
+
+const phases = [
+  {
+    id: 'A',
+    title: 'Antes de pagar al proveedor',
+    time: 'Semanas 1–2',
+    steps: [
+      { id:'A1', title:'Confirmar NCM con el despachante', tag:'key',
+        sub:'Enviar proforma + ficha técnica + fotos. Pedir: NCM, tributos e intervenciones vigentes en SIM. NCM probable: 9406.90.20 (arancel 12,6% por Decreto 513/2025).' },
+      { id:'A2', title:'Verificar habilitación importadora en ARCA/Aduana', tag:'key',
+        sub:'La empresa importadora debe estar activa en el padrón de importadores de DGA. CUIT con clave fiscal nivel 3 o superior.' },
+      { id:'A3', title:'Consultar si la NCM tiene intervenciones especiales', tag:'warn',
+        sub:'Revisar en SIM si requiere licencia previa, intervención de DNRT, INTA u otro organismo al momento de oficializar.' },
+      { id:'A4', title:'Decidir: ¿con o sin instalación eléctrica?', tag:'warn',
+        sub:'Con eléctrica: requiere DJC bajo Res. 16/2025 y posible certificación. Sin eléctrica: evita toda esa gestión. Decisión estratégica clave antes de confirmar la orden.' },
+      { id:'A5', title:'Si va con eléctrica: pedir certificados IEC de componentes al proveedor',
+        sub:'Tablero, tomas, llaves, cables. Los cert. CE/IEC sirven como base de la DJC argentina (Res. 16/2025) sin re-ensayar localmente.' },
+      { id:'A6', title:'Solicitar toda la documentación técnica al proveedor',
+        sub:'Ficha técnica completa (medidas, peso, materiales, uso), cert. libre de asbesto, cert. fuego/reacción al fuego, CE estructura (EN 1090), CE puertas y ventanas (EN 14351), SGS frame y recubrimiento.' },
+    ]
+  },
+  {
+    id: 'B',
+    title: 'Pago y contrato con el proveedor',
+    time: 'Semana 2–3',
+    steps: [
+      { id:'B1', title:'Negociar y firmar contrato de compraventa',
+        sub:'Incluir: incoterm FOB Shanghai, cantidad (14 unidades × contenedor 40HQ), precio unitario FC-01, especificaciones, plazo de producción y embarque.' },
+      { id:'B2', title:'Tramitar pago internacional (transferencia SWIFT)', tag:'warn',
+        sub:'Coordinar con el banco el envío del anticipo (normalmente 30%). Gestionar en ARCA la autorización de pago al exterior si aplica. Reservar saldo según acuerdo.' },
+      { id:'B3', title:'Contratar seguro de carga internacional',
+        sub:'Póliza "todo riesgo" para transporte marítimo Shanghai → Buenos Aires. Valor asegurado: mínimo valor CIF. Requerido para la liquidación aduanera.' },
+    ]
+  },
+  {
+    id: 'C',
+    title: 'Durante la producción en China',
+    time: 'Semanas 3–10 (según lead time)',
+    steps: [
+      { id:'C1', title:'Solicitar inspección pre-embarque', tag:'info',
+        sub:'Contratar inspector en China (SGS, Bureau Veritas, Intertek) para verificar calidad, cantidad y conformidad con la ficha técnica antes de cargar el contenedor. Opcional pero recomendada.' },
+      { id:'C2', title:'Confirmar documentos de exportación chinos',
+        sub:'Factura comercial definitiva, packing list detallado, certificado de origen Form A o CO China, y declaración de exportación china.' },
+      { id:'C3', title:'Gestionar la DJC de seguridad eléctrica (si va con eléctrica)', tag:'warn',
+        sub:'Contactar certificadora local (IRAM, TÜV Rheinland, IQC) con los cert. IEC del proveedor. Preparar la Declaración Jurada de Conformidad bajo Res. 16/2025 antes del arribo.' },
+    ]
+  },
+  {
+    id: 'D',
+    title: 'Embarque y tránsito marítimo',
+    time: 'Semanas 10–14 aprox.',
+    steps: [
+      { id:'D1', title:'Recibir el Bill of Lading (BL) original',
+        sub:'Verificar que los datos coincidan: consignatario, puerto destino (Buenos Aires/Zárate), descripción de mercadería, número de contenedor 40HQ y peso total.' },
+      { id:'D2', title:'Confirmar arribo con agente de carga / naviera',
+        sub:'Coordinar con el freight forwarder o agente marítimo en Argentina. Tener en cuenta posibles gastos de demurrage si se demora el retiro.' },
+      { id:'D3', title:'Preparar documentación completa para el despacho',
+        sub:'BL original, factura comercial, packing list, cert. de origen, ficha técnica, certificados del proveedor (asbesto, fuego, CE, SGS). Entregar al despachante antes del arribo.' },
+    ]
+  },
+  {
+    id: 'E',
+    title: 'Despacho aduanero en Argentina',
+    time: 'Semanas 14–16',
+    steps: [
+      { id:'E1', title:'El despachante oficializa la destinación en SIM', tag:'key',
+        sub:'Declara NCM, valor FOB, país de origen. Liquida tributos: DI (~12,6%), Tasa Estadística (3%), IVA (21%), IVA Adicional (~10,5%), Ganancias (6%). Sobre valor CIF.' },
+      { id:'E2', title:'Pagar los tributos aduaneros', tag:'key',
+        sub:'Tener los fondos disponibles en cuenta bancaria para girar a DGA. El despachante emite la liquidación previa para validar antes de pagar.' },
+      { id:'E3', title:'Canal de selectividad: verde, naranja o rojo', tag:'warn',
+        sub:'Verde = liberación automática. Naranja = revisión documental. Rojo = revisión física. Tener toda la documentación técnica ordenada por si cae en rojo.' },
+      { id:'E4', title:'Si hay observación eléctrica: presentar DJC',
+        sub:'Si aduana requiere acreditación de seguridad eléctrica, presentar la DJC ya preparada + certificados CE/IEC de los componentes del proveedor.' },
+      { id:'E5', title:'Obtener el libramiento del contenedor',
+        sub:'Una vez pagados los tributos y aprobado el canal, el despachante obtiene el permiso de libramiento. El contenedor puede retirarse de la terminal portuaria.' },
+    ]
+  },
+  {
+    id: 'F',
+    title: 'Retiro, logística y destino final',
+    time: 'Semanas 16–17',
+    steps: [
+      { id:'F1', title:'Contratar transporte especial para contenedor 40HQ',
+        sub:'Coordinar camión con equipo para descarga (grúa o similar) hacia el depósito o destino final en Mendoza. Prever permisos de circulación si corresponde.' },
+      { id:'F2', title:'Verificar y fotografiar los módulos al retiro',
+        sub:'Revisar estado de cada unidad contra el packing list. Documentar cualquier daño antes de firmar la recepción. Base para posibles reclamos al seguro.' },
+      { id:'F3', title:'Si se comercializa: gestionar certificación de seguridad eléctrica', tag:'warn',
+        sub:'Para vender módulos con eléctrica a terceros, tramitar el certificado habilitante ante IRAM o TÜV Rheinland. Base: cert. IEC del proveedor + DJC. Sin esto no se puede comercializar.' },
+      { id:'F4', title:'Instalación eléctrica local (si se importó sin eléctrica)',
+        sub:'Contratar electricista matriculado en Mendoza para instalación y habilitación local. Camino más simple, sin trabas de importación.' },
+    ]
+  }
+];
+
+const totalCount = phases.reduce((a,p) => a + p.steps.length, 0);
+let state = {};
+
+function load() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) state = JSON.parse(r); } catch(e) {}
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function tagHtml(tag) {
+  if (!tag) return '';
+  const map = { key: ['tag-key','Crítico'], warn: ['tag-warn','Atención'], info: ['tag-info','Opcional'], alert: ['tag-alert','Alerta'] };
+  const [cls, label] = map[tag] || ['',''];
+  return `<span class="tag ${cls}">${label}</span>`;
+}
+
+function checkSvg() {
+  return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function chevronSvg() {
+  return `<svg class="chevron" viewBox="0 0 18 18" fill="none"><polyline points="4,7 9,12 14,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function doneCount() { return Object.values(state).filter(Boolean).length; }
+function phasesDone() { return phases.filter(p => p.steps.every(s => state[s.id])).length; }
+
+function updateSummary() {
+  const done = doneCount();
+  const pct = Math.round(done / totalCount * 100);
+  const pd = phasesDone();
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = done + ' / ' + totalCount;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-phases').textContent = pd;
+  document.getElementById('s-pct').textContent = pct + '%';
+  document.getElementById('s-status').textContent = done === totalCount ? '¡Completado!' : (done === 0 ? 'Sin iniciar' : 'En curso');
+  document.getElementById('celebration').classList.toggle('show', done === totalCount);
+}
+
+function renderPhases() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+
+  phases.forEach((phase, pi) => {
+    const allDone = phase.steps.every(s => state[s.id]);
+    const pDone = phase.steps.filter(s => state[s.id]).length;
+
+    const phaseEl = document.createElement('div');
+    phaseEl.className = `phase ph-${phase.id}${allDone ? ' done' : ''}`;
+
+    const isOpen = pi === 0 || phase.steps.some(s => !state[s.id]);
+
+    phaseEl.innerHTML = `
+      <div class="phase-header${isOpen ? ' open' : ''}" data-phase="${phase.id}">
+        <div class="phase-badge">
+          ${allDone
+            ? `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polyline points="2,7 5.5,10.5 11,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+            : phase.id}
+        </div>
+        <div class="phase-info">
+          <div class="phase-title">${phase.title}</div>
+          <div class="phase-time">${phase.time}</div>
+        </div>
+        <div class="phase-right">
+          <span class="phase-count">${pDone}/${phase.steps.length}</span>
+          ${chevronSvg()}
+        </div>
+      </div>
+      <div class="phase-body${isOpen ? ' open' : ''}">
+        <div class="steps-list">
+          ${phase.steps.map((s, si) => `
+            ${si > 0 ? '<div class="step-divider"></div>' : ''}
+            <div class="step${state[s.id] ? ' done' : ''}" data-step="${s.id}">
+              <div class="step-chk">${checkSvg()}</div>
+              <div class="step-body">
+                <div class="step-title">${s.title}${tagHtml(s.tag)}</div>
+                <div class="step-sub">${s.sub}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(phaseEl);
+  });
+
+  // Events
+  container.querySelectorAll('.phase-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const body = h.nextElementSibling;
+      const isOpen = body.classList.contains('open');
+      h.classList.toggle('open', !isOpen);
+      body.classList.toggle('open', !isOpen);
+    });
+  });
+
+  container.querySelectorAll('.step').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.step;
+      state[id] = !state[id];
+      save();
+      el.classList.toggle('done', state[id]);
+      const chk = el.querySelector('.step-chk');
+      chk.style.background = state[id] ? 'var(--accent)' : '';
+      chk.style.borderColor = state[id] ? 'var(--accent)' : '';
+      const svg = chk.querySelector('svg');
+      svg.style.display = state[id] ? 'block' : 'none';
+      // update phase badge
+      const phaseId = id[0];
+      const phaseEl = el.closest('.phase');
+      const phase = phases.find(p => p.id === phaseId);
+      const pDone = phase.steps.filter(s => state[s.id]).length;
+      const allDone = pDone === phase.steps.length;
+      phaseEl.classList.toggle('done', allDone);
+      phaseEl.querySelector('.phase-count').textContent = pDone + '/' + phase.steps.length;
+      updateSummary();
+    });
+  });
+
+  updateSummary();
+}
+
+function resetAll() {
+  if (!confirm('¿Reiniciar todos los pasos? Esta acción no se puede deshacer.')) return;
+  state = {};
+  save();
+  renderPhases();
+}
+
+load();
+renderPhases();
+</script>
+</body>
+</html>
